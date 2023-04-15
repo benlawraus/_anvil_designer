@@ -300,7 +300,7 @@ item_getter_setter = ItemGetterSetter("""
 def add_properties_to_item() -> str:
     return f"""
 {TAB}{TAB}if properties.get('item', None) is not None:
-{TAB}{TAB}{TAB}self.item = properties['item']
+{TAB}{TAB}{TAB}self._item = properties['item']
 """
 
 
