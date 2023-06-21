@@ -103,6 +103,8 @@ def validate_yaml(value: sy.YAML, sequence_key: Union[str, int]) -> None:
                 value.revalidate(sy.EmptyList())
             except AttributeError:
                 del value[sequence_key]
+            except sy.YAMLValidationError:
+                print(f"Warning: {value[sequence_key].data} is a sequence with length=0.")
         else:
             for ix in range(len(value[sequence_key])):
                 validate_yaml(value[sequence_key], ix)
