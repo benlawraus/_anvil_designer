@@ -216,6 +216,7 @@ def lowest_level_component(value: sy.YAML,
     value :
     parent :
     import_list :
+    form_name :
     """
     name = value['name'].text
     of_type: str = value['type'].text  # raise attribute error if no `type`
@@ -248,6 +249,7 @@ def derive_dict(value: sy.YAML,
     :param catalog: This is this function's return. It is a parameter because this function is recursive.
     :param parent:
     :param import_list: Contains the import statement at beginning of file.
+    :param form_name: The name of the form
     :return: None   (`catalog` is changed)
     """
     top_level = False
@@ -279,28 +281,36 @@ def derive_dict(value: sy.YAML,
 def databindings_as_string(databindings) -> str:
     as_str = 'databindings = [\n'
     for d in databindings:
-        as_str += f'{TAB}dict(' + dict2string(d).replace('\n', '').replace(TAB, ' ').replace("['", '["').replace("']",
-                                                                                                                 '"]') + '),\n'
+        as_str += f'{TAB}dict(' + dict2string(d).replace('\n', ''). \
+            replace(TAB, ' ').replace("['", '["').replace("']", '"]') + '),\n'
     as_str += ']'
     return as_str
 
 
 ItemGetterSetter = namedtuple('ItemGetterSetter', ['defs', 'imports'])
 item_getter_setter = ItemGetterSetter("""
-    @property
-    def item(self):
-        return attr_getter(self, 'item')
+    def __getattr__(self, item):
+        '''It seems pycharm runs @property on initialization, so this is the alternative.
+        It is for the attribute self.item.'''
+        if item == 'item':
+            return attr_getter(self, 'item')
+        else:
+            raise AttributeError(f"The attribute {item} is not defined.")
 
-    @item.setter
-    def item(self, some_dict):
-        attr_setter(self, some_dict, 'item')
-        return
+    def __setattr__(self, key, value):
+        '''It seems pycharm runs @property on initialization, so this is the alternative.
+        It is for the attribute self.item.'''
+        if key == 'item':
+            attr_setter(self, value, 'item')
+        else:
+            self.__dict__[key] = value
 """, "from _anvil_designer.common_structures import attr_getter, attr_setter, ClassDict")
+
 
 def add_properties_to_item() -> str:
     return f"""
 {TAB}{TAB}if properties.get('item', None) is not None:
-{TAB}{TAB}{TAB}self._item = properties['item']
+{TAB}{TAB}{TAB}self.item = properties['item']
 """
 
 

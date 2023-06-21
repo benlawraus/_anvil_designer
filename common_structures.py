@@ -111,6 +111,8 @@ def attr_setter(instance, some_dict, attr_name='item'):
             if key == item_key:
                 # get the item key from the data-binding
                 attr_member = binding['element'].split('.')
+                # get the UI component
                 ui_component = getattr(instance, attr_member[0])
+                # set the UI component's property to the item value
                 setattr(ui_component, attr_member[1], some_dict[key])
     return
