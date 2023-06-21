@@ -32,6 +32,8 @@ def table_dict2string(table_dict):
         file_str += table_str
 
     file_str += """
+    def __getitem__(self, key):
+        return getattr(self, key)
 
 app_tables = AppTables()
 """
